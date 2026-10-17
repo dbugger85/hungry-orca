@@ -1,7 +1,7 @@
 // Offline support: the game itself is fetched fresh when online (so updates show up),
 // and falls back to the saved copy when offline. Fonts are saved the first time they load.
-const CACHE = 'hungry-orca-v1';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+const CACHE = 'hungry-orca-v2';
+const FILES = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));

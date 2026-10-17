@@ -27,4 +27,4 @@ Works on computers, tablets and phones (best held sideways).
 
 The game is all in `index.html`: one file with a canvas and plain JavaScript, no build step. Open it in a browser to play locally.
 
-`manifest.webmanifest`, `sw.js` (offline support) and the `icon-*.png` files make it installable.
+`manifest.webmanifest`, `sw.js` (offline support) and `icons/` make it installable. `icons/icon.svg` (rounded) and `icons/icon-square.svg` (full-bleed, for Android and iPhone) are the sources, in the same glass style as PrimeTime, ProPoker and ProQuiz; the PNGs are made with `rsvg-convert -w 512 -h 512 icons/icon.svg -o icons/icon-512.png`.
