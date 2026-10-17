@@ -16,6 +16,15 @@ An easy, slow Flappy-Bird-style game for kids. Swim as an orca in the Arctic, ea
 
 Works on computers, tablets and phones (best held sideways).
 
+## Full screen and app
+
+- **Full screen:** tap the corners button at the top right (or press F). On Android it also turns the screen sideways.
+- **Install as an app (Android, Chrome, Edge):** tap **Install app** at the top of the start screen, or use the browser menu > *Install app* / *Add to Home screen*.
+- **iPhone/iPad:** open the game in Safari, tap Share > **Add to Home Screen**. It then opens full screen from the home screen.
+- Once installed, the game also works offline.
+
 ## Files
 
-Everything is in `index.html`: one file with a canvas and plain JavaScript, no build step. Open it in a browser to play locally.
+The game is all in `index.html`: one file with a canvas and plain JavaScript, no build step. Open it in a browser to play locally.
+
+`manifest.webmanifest`, `sw.js` (offline support) and the `icon-*.png` files make it installable.

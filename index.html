@@ -6,6 +6,11 @@
 <meta name="theme-color" content="#7fb0d8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hungry Orca">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Hungry Orca</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&display=swap" rel="stylesheet">
@@ -143,9 +148,46 @@ function swim() {
   sfx.swim();
   for (let i = 0; i < 3; i++) bubble(ORCA_X - 40, orca.y + rand(-6, 6), 2 + Math.random() * 2);
 }
+// Full screen (not on iPhone Safari, which can't do it for games; there you add it to the home screen)
+const docEl = document.documentElement;
+const canFullscreen = !!(docEl.requestFullscreen || docEl.webkitRequestFullscreen);
+const isInstalled = () => matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches || navigator.standalone === true;
+const isFull = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+function toggleFullscreen() {
+  if (isFull()) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); return; }
+  const p = (docEl.requestFullscreen || docEl.webkitRequestFullscreen).call(docEl);
+  const lock = () => { try { screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} };
+  if (p && p.then) p.then(lock).catch(() => {}); else lock();
+}
+
+// Install as an app (Chrome/Edge/Android show the button; on iPhone use Share > Add to Home Screen)
+let installPrompt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; });
+addEventListener('appinstalled', () => { installPrompt = null; });
+function install() {
+  const p = installPrompt; installPrompt = null;
+  p.prompt();
+}
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+// Round buttons in the top-right corner: sound, full screen, and "Install app" when available
+function topButtons() {
+  const b = { mute: { x: W - 40, y: 30 } };
+  let x = W - 84;
+  if (canFullscreen && !isInstalled()) { b.fs = { x, y: 30 }; x -= 44; }
+  if (installPrompt && state !== 'play') b.install = { x: x - 32, y: 30 };
+  return b;
+}
+
 function onPress(gx, gy) {
   audioInit();
-  if (gx !== undefined && gx > W - 70 && gy < 60) { muted = !muted; return; }
+  if (gx !== undefined) {
+    const b = topButtons();
+    const near = p => p && Math.hypot(gx - p.x, gy - p.y) < 24;
+    if (near(b.mute)) { muted = !muted; return; }
+    if (near(b.fs)) { toggleFullscreen(); return; }
+    if (b.install && Math.abs(gx - b.install.x) < 56 && Math.abs(gy - b.install.y) < 20) { install(); return; }
+  }
   if (state === 'title') { start(); swim(); }
   else if (state === 'play') swim();
   else if (state === 'over' && t - overAt > 0.8) start();
@@ -159,6 +201,7 @@ addEventListener('keydown', e => {
     e.preventDefault();
     if (!e.repeat) onPress();
   } else if (e.code === 'KeyM') muted = !muted;
+  else if (e.code === 'KeyF' && canFullscreen) toggleFullscreen();
 });
 
 // ---------- Helpers ----------
@@ -1058,8 +1101,31 @@ function heart(x, y, s, full) {
   ctx.fillStyle = full ? '#ff5c7a' : 'rgba(255,255,255,0.25)'; ctx.fill();
   ctx.strokeStyle = 'rgba(6,36,61,0.8)'; ctx.lineWidth = 1.5; ctx.stroke(); ctx.restore();
 }
-function drawMute() {
-  const x = W - 40, y = 30;
+function drawTopButtons() {
+  const b = topButtons();
+  drawMute(b.mute.x, b.mute.y);
+  if (b.fs) {
+    ctx.save(); ctx.translate(b.fs.x, b.fs.y);
+    ctx.fillStyle = 'rgba(6,36,61,0.5)'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    const k = isFull() ? -1 : 1; // corners point out to enter, in to leave
+    ctx.beginPath();
+    for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const cx = sx * (k > 0 ? 8 : 3), cy = sy * (k > 0 ? 8 : 3);
+      ctx.moveTo(cx - sx * 5 * k, cy); ctx.lineTo(cx, cy); ctx.lineTo(cx, cy - sy * 5 * k);
+    }
+    ctx.stroke(); ctx.restore();
+  }
+  if (b.install) {
+    ctx.save(); ctx.translate(b.install.x, b.install.y);
+    ctx.fillStyle = '#ffd84a'; rr(-54, -17, 108, 34, 17); ctx.fill();
+    ctx.strokeStyle = '#06243d'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-38, -8); ctx.lineTo(-38, 4); ctx.moveTo(-43, -1); ctx.lineTo(-38, 4); ctx.lineTo(-33, -1); ctx.moveTo(-44, 8); ctx.lineTo(-32, 8); ctx.stroke();
+    ctx.font = `700 16px ${FONT}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#06243d';
+    ctx.fillText('Install app', -26, 1); ctx.restore();
+  }
+}
+function drawMute(x, y) {
   ctx.save(); ctx.translate(x, y);
   ctx.fillStyle = 'rgba(6,36,61,0.5)'; ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-9, -4); ctx.lineTo(-4, -4); ctx.lineTo(2, -9); ctx.lineTo(2, 9); ctx.lineTo(-4, 4); ctx.lineTo(-9, 4); ctx.closePath(); ctx.fill();
@@ -1148,7 +1214,7 @@ function draw() {
     textOut(String(score), 24, 32, 36, '#ffffff', 'left');
     for (let i = 0; i < 3; i++) heart(34 + i * 30, 70, 1.2, i < lives);
   }
-  drawMute();
+  drawTopButtons();
   if (state === 'title') drawTitle();
   if (state === 'over') drawOver();
   ctx.restore();
