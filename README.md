@@ -4,17 +4,22 @@ An easy, slow Flappy-Bird-style game for kids. Swim as an orca in the Arctic, ea
 
 **Play:** https://dbugger85.github.io/hungry-orca/
 
+![Hungry Orca: the orca, fish, an ice floe with a seal, a fishing net and a submarine](screenshots/gameplay.jpg)
+
 ## How to play
 
-- Tap, click or press Space to swim up. The orca sinks slowly on its own.
+- Tap, click or press Space (or ↑, W, Enter) to swim up. The orca sinks slowly on its own.
 - Fish: +1
 - Swim right under an ice floe and the seal falls in. Catch it: +5
 - Sunfish (rare): ram it, +10
 - Watch out for the whaling ship: a red dotted line shows where the harpoon will fly.
 - You have 3 lives and get one back every 50 points. A net rips when you hit it, but it still costs a life.
+- On your last life, a net catches the orca; anything else turns it belly-up.
 - The game gets slowly faster over time.
 
-Works on computers, tablets and phones (best held sideways).
+Works on computers, tablets and phones (best held sideways). The speaker button (or M) turns the sound off.
+
+![The whaling ship firing a harpoon](screenshots/whaler.jpg)
 
 ## Full screen and app
 
@@ -25,6 +30,23 @@ Works on computers, tablets and phones (best held sideways).
 
 ## Files
 
-The game is all in `index.html`: one file with a canvas and plain JavaScript, no build step. Open it in a browser to play locally.
+| File | What |
+|---|---|
+| `index.html` | The whole game: one file with a canvas and plain JavaScript, no build step, no libraries, no image or sound files (everything is drawn and synthesized in code). Open it in a browser to play locally |
+| `manifest.webmanifest`, `sw.js`, `icons/` | Make it installable and playable offline. `icons/icon.svg` (rounded) and `icons/icon-square.svg` (full-bleed, for Android and iPhone) are the sources, in the same glass style as PrimeTime, ProPoker and ProQuiz |
+| `test/` | `npm test` (quick checks) and `npm run screenshots` (pictures of set-up game scenes in `test/out/`) |
+| `screenshots/` | The pictures in this README |
+| `CLAUDE.md` | How the code works, for development with Claude Code |
+| `PLAN.md` | The idea and every decision, dated |
 
-`manifest.webmanifest`, `sw.js` (offline support) and `icons/` make it installable. `icons/icon.svg` (rounded) and `icons/icon-square.svg` (full-bleed, for Android and iPhone) are the sources, in the same glass style as PrimeTime, ProPoker and ProQuiz; the PNGs are made with `rsvg-convert -w 512 -h 512 icons/icon.svg -o icons/icon-512.png`.
+## Development
+
+```sh
+npm test               # checks the game script, the app manifest, the icons and the offline file list
+npm run screenshots    # screenshots of the game in set-up situations → test/out/ (needs Chromium)
+npm start              # serves the game at http://localhost:8000
+```
+
+Remake the PNG icons after changing an SVG: `rsvg-convert -w 512 -h 512 icons/icon.svg -o icons/icon-512.png` (and 192; `icon-maskable-512.png` and the 180 px `apple-touch-icon.png` from `icon-square.svg`).
+
+Pushing to `main` updates the live game in about a minute.

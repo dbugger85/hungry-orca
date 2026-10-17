@@ -1,0 +1,10 @@
+{
+  "name": "hungry-orca",
+  "private": true,
+  "description": "Easy Flappy-Bird-style orca game for kids",
+  "scripts": {
+    "test": "node test/check.mjs",
+    "screenshots": "node test/screenshots.mjs",
+    "start": "python3 -m http.server 8000"
+  }
+}
